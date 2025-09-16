@@ -72,5 +72,8 @@ app.post('/api/webhooks/:id/:token/:authToken', async (req, res) => {
     return res.status(502).json({ ok: false, error: 'forward_failed', details: String(err) })
   }
 })
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', uptime: process.uptime(), timestamp: Date.now() })
+})
 
 app.listen(PORT, () => console.log(`proxy listening on ${PORT}`))
