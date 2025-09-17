@@ -7,7 +7,6 @@ const PORT = process.env.PORT || 3000
 const globalConcurrency = parseInt(process.env.GLOBAL_CONCURRENCY || '6', 10)
 const forwardTimeoutMs = parseInt(process.env.FORWARD_TIMEOUT_MS || '8000', 10)
 
-
 const allowedWebhooks = (process.env.ALLOWED_WEBHOOKS || '')
   .split(';')
   .map(p => p.trim())
@@ -29,7 +28,12 @@ async function withConcurrency(fn) {
 
 function isAllowedWebhook(url) {
   if (allowedWebhooks.length === 0) return false
-  return allowedWebhooks.some(pattern => new RegExp(pattern).test(url))
+  return allowedWebhooks.some(pattern => {
+    if (pattern.includes('\\') || pattern.includes('[') || pattern.includes('(')) {
+      return new RegExp(pattern).test(url)
+    }
+    return pattern === url
+  })
 }
 
 app.post('/api/webhooks/:id/:token', async (req, res) => {
@@ -78,4 +82,4 @@ app.get('/health', (req, res) => {
   })
 })
 
-app.listen(PORT, () => console.log(`proxy listening on ${PORT}`))
+app.listen(PORT, () => console.log(`Proxy active on port: ${PORT}`))
